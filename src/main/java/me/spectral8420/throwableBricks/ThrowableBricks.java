@@ -1,6 +1,7 @@
 package me.spectral8420.throwableBricks;
 
 import me.spectral8420.throwableBricks.compatibility.Compatibility;
+import me.spectral8420.throwableBricks.compatibility.CompatibilityChecks;
 import me.spectral8420.throwableBricks.compatibility.LandsCompatibility;
 import me.spectral8420.throwableBricks.config.ConfigManager;
 import me.spectral8420.throwableBricks.listener.CustomListenerManager;
@@ -13,7 +14,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class ThrowableBricks extends JavaPlugin {
     @Override
     public void onLoad() {
-        Compatibility.registerCustomWorldGuardFlag();
+        if(CompatibilityChecks.isWorldGuardPluginInstalled()) {
+            Compatibility.registerCustomWorldGuardFlag();
+        }
     }
 
     @Override
@@ -23,9 +26,11 @@ public final class ThrowableBricks extends JavaPlugin {
         CooldownTracker.register(this);
         ProjectileTracker.register(this);
 
-        LandsCompatibility.setup(this);
-        ConfigManager.load(this);
+        if(CompatibilityChecks.isLandsPluginInstalled()) {
+            LandsCompatibility.setup(this);
+        }
 
+        ConfigManager.load(this);
         ConsoleHelper.log(ChatColor.GREEN + "ThrowableBricks has been enabled!");
     }
 

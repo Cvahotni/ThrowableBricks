@@ -7,6 +7,10 @@ public class LandsCompatibility {
     private static LandsIntegration integration;
 
     public static void setup(ThrowableBricks plugin) {
+        if(!CompatibilityChecks.isLandsPluginInstalled()) {
+            return;
+        }
+
         integration = LandsIntegration.of(plugin);
     }
 

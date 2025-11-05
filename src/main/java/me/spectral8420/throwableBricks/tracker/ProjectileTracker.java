@@ -2,6 +2,7 @@ package me.spectral8420.throwableBricks.tracker;
 
 import me.spectral8420.throwableBricks.ThrowableBricks;
 import me.spectral8420.throwableBricks.compatibility.Compatibility;
+import me.spectral8420.throwableBricks.compatibility.CompatibilityChecks;
 import me.spectral8420.throwableBricks.config.ConfigManager;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
@@ -124,8 +125,16 @@ public class ProjectileTracker {
             Location modifiedLocation = location.clone().add(closest);
             BlockState state = world.getBlockState(modifiedLocation);
 
-            if(!Compatibility.checkLands(modifiedLocation) || !Compatibility.checkWorldGuard(modifiedLocation)) {
-                continue;
+            if(CompatibilityChecks.isLandsPluginInstalled()) {
+                if(!Compatibility.checkLands(modifiedLocation)) {
+                    continue;
+                }
+            }
+
+            if(CompatibilityChecks.isWorldGuardPluginInstalled()) {
+                if(!Compatibility.checkWorldGuard(modifiedLocation)) {
+                    continue;
+                }
             }
 
             if(state.getBlock().getType().name().contains("GLASS")) {
