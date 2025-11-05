@@ -10,7 +10,10 @@ https://www.youtube.com/watch?v=iTk7DX1PeXo
 - Affects living entities too, such and animals and mobs, and players.
 - Respects WorldGuard and Lands claims.
 
-# Installation and Building
+#Installation
+- You can find the pre-built binary at https://github.com/Cvahotni/ThrowableBricks/releases
+
+# Building
 - Clone the repository to your folder
 - Open with IntelliJ Idea 2024.3 or any other compatible IDE.
 - Create and configure a task for "maven package".
