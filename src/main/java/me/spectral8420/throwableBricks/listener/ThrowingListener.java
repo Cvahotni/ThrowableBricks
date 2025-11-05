@@ -1,5 +1,6 @@
 package me.spectral8420.throwableBricks.listener;
 
+import me.spectral8420.throwableBricks.config.ConfigManager;
 import me.spectral8420.throwableBricks.tracker.CooldownTracker;
 import me.spectral8420.throwableBricks.helper.ThrowHelper;
 import org.bukkit.Location;
@@ -31,7 +32,7 @@ public class ThrowingListener implements Listener {
             return;
         }
 
-        float cooldown = 1.0f;
+        float cooldown = (float) ConfigManager.getCooldown();
 
         if(!CooldownTracker.hasCooldown(player.getUniqueId())) {
             CooldownTracker.registerCooldown(player.getUniqueId(), cooldown);

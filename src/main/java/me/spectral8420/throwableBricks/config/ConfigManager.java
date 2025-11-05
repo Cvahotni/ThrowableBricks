@@ -18,6 +18,7 @@ public class ConfigManager {
     private static int defaultPickupDelay = 20;
     private static double minTicksLived = 20.0;
     private static double checkDistance = 4.0;
+    private static double cooldown = 1.0;
 
     private static final List<PotionEffect> effectsToGiveOnHit = new ArrayList<>();
 
@@ -28,6 +29,7 @@ public class ConfigManager {
         config.set("defaultPickupDelay", defaultPickupDelay);
         config.set("minTicksLived", minTicksLived);
         config.set("checkDistance", checkDistance);
+        config.set("cooldown", cooldown);
 
         loadPotionEffects(config);
         plugin.saveConfig();
@@ -36,11 +38,15 @@ public class ConfigManager {
     public static void save(ThrowableBricks plugin) {
         FileConfiguration config = plugin.getConfig();
 
-        if(!config.contains("damageFromBrick") && !config.contains("defaultPickupDelay") || !config.contains("minTicksLived") || !config.contains("checkDistance")) {
+        if(!config.contains("damageFromBrick") && !config.contains("defaultPickupDelay") ||
+                !config.contains("minTicksLived") || !config.contains("checkDistance")  ||
+                !config.contains("cooldown")) {
+
             config.set("damageFromBrick", damageFromBrick);
             config.set("defaultPickupDelay", defaultPickupDelay);
             config.set("minTicksLived", minTicksLived);
             config.set("checkDistance", checkDistance);
+            config.set("cooldown", cooldown);
 
             return;
         }
@@ -49,6 +55,7 @@ public class ConfigManager {
         defaultPickupDelay = config.getInt("defaultPickupDelay");
         minTicksLived = config.getInt("minTicksLived");
         checkDistance = config.getDouble("checkDistance");
+        cooldown = config.getDouble("cooldown");
 
         savePotionEffects(config);
         plugin.saveConfig();
@@ -122,6 +129,10 @@ public class ConfigManager {
 
     public static double getCheckDistance() {
         return checkDistance;
+    }
+
+    public static double getCooldown() {
+        return cooldown;
     }
 
     public static List<PotionEffect> getEffectsToGiveOnHit() {
