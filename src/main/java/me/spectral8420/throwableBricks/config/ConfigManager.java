@@ -25,11 +25,25 @@ public class ConfigManager {
     public static void load(ThrowableBricks plugin) {
         FileConfiguration config = plugin.getConfig();
 
-        config.set("damageFromBrick", damageFromBrick);
-        config.set("defaultPickupDelay", defaultPickupDelay);
-        config.set("minTicksLived", minTicksLived);
-        config.set("checkDistance", checkDistance);
-        config.set("cooldown", cooldown);
+        if(config.contains("damageFromBrick")) {
+            damageFromBrick = config.getDouble("damageFromBrick");
+        }
+
+        if(config.contains("defaultPickupDelay")) {
+            defaultPickupDelay = config.getInt("defaultPickupDelay");
+        }
+
+        if(config.contains("minTicksLived")) {
+            minTicksLived = config.getDouble("minTicksLived");
+        }
+
+        if(config.contains("checkDistance")) {
+            checkDistance = config.getDouble("checkDistance");
+        }
+
+        if(config.contains("cooldown")) {
+            cooldown = config.getDouble("cooldown");
+        }
 
         loadPotionEffects(config);
         plugin.saveConfig();
@@ -38,24 +52,11 @@ public class ConfigManager {
     public static void save(ThrowableBricks plugin) {
         FileConfiguration config = plugin.getConfig();
 
-        if(!config.contains("damageFromBrick") && !config.contains("defaultPickupDelay") ||
-                !config.contains("minTicksLived") || !config.contains("checkDistance")  ||
-                !config.contains("cooldown")) {
-
-            config.set("damageFromBrick", damageFromBrick);
-            config.set("defaultPickupDelay", defaultPickupDelay);
-            config.set("minTicksLived", minTicksLived);
-            config.set("checkDistance", checkDistance);
-            config.set("cooldown", cooldown);
-
-            return;
-        }
-
-        damageFromBrick = config.getInt("damageFromBrick");
-        defaultPickupDelay = config.getInt("defaultPickupDelay");
-        minTicksLived = config.getInt("minTicksLived");
-        checkDistance = config.getDouble("checkDistance");
-        cooldown = config.getDouble("cooldown");
+        config.set("damageFromBrick", damageFromBrick);
+        config.set("defaultPickupDelay", defaultPickupDelay);
+        config.set("minTicksLived", minTicksLived);
+        config.set("checkDistance", checkDistance);
+        config.set("cooldown", cooldown);
 
         savePotionEffects(config);
         plugin.saveConfig();
