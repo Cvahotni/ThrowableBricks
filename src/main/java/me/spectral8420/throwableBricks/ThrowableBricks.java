@@ -1,8 +1,8 @@
 package me.spectral8420.throwableBricks;
 
-import me.spectral8420.throwableBricks.compatibility.Compatibility;
 import me.spectral8420.throwableBricks.compatibility.CompatibilityChecks;
 import me.spectral8420.throwableBricks.compatibility.LandsCompatibility;
+import me.spectral8420.throwableBricks.compatibility.WorldGuardCompatibility;
 import me.spectral8420.throwableBricks.config.ConfigManager;
 import me.spectral8420.throwableBricks.listener.CustomListenerManager;
 import me.spectral8420.throwableBricks.helper.ConsoleHelper;
@@ -15,7 +15,7 @@ public final class ThrowableBricks extends JavaPlugin {
     @Override
     public void onLoad() {
         if(CompatibilityChecks.isWorldGuardPluginInstalled()) {
-            Compatibility.registerCustomWorldGuardFlag();
+            WorldGuardCompatibility.registerCustomWorldGuardFlag();
         }
     }
 

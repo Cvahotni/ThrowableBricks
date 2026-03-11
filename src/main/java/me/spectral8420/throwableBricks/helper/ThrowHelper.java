@@ -10,7 +10,7 @@ import org.bukkit.util.Vector;
 
 public class ThrowHelper {
     public static void throwItemStack(Player player, Location target, World world, ItemStack item, double speed) {
-        Item entity = world.dropItemNaturally(player.getLocation(), item);
+        Item entity = world.dropItemNaturally(player.getLocation().clone().add(new Vector(0.0, 0.5, 0.0)), item);
 
         entity.setPickupDelay(Integer.MAX_VALUE);
         entity.setGravity(true);

@@ -1,8 +1,9 @@
 package me.spectral8420.throwableBricks.tracker;
 
 import me.spectral8420.throwableBricks.ThrowableBricks;
-import me.spectral8420.throwableBricks.compatibility.Compatibility;
 import me.spectral8420.throwableBricks.compatibility.CompatibilityChecks;
+import me.spectral8420.throwableBricks.compatibility.LandsCompatibility;
+import me.spectral8420.throwableBricks.compatibility.WorldGuardCompatibility;
 import me.spectral8420.throwableBricks.config.ConfigManager;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
@@ -11,7 +12,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.*;
@@ -25,7 +25,7 @@ public class ProjectileTracker {
             for(World world : Bukkit.getWorlds()) {
                 damageTargets(world);
             }
-        }, 0, 1);
+        }, 0, 5);
     }
 
     public static void addProjectile(UUID uuid, UUID owner) {
@@ -126,13 +126,13 @@ public class ProjectileTracker {
             BlockState state = world.getBlockState(modifiedLocation);
 
             if(CompatibilityChecks.isLandsPluginInstalled()) {
-                if(!Compatibility.checkLands(modifiedLocation)) {
+                if(!LandsCompatibility.checkLands(modifiedLocation)) {
                     continue;
                 }
             }
 
             if(CompatibilityChecks.isWorldGuardPluginInstalled()) {
-                if(!Compatibility.checkWorldGuard(modifiedLocation)) {
+                if(!WorldGuardCompatibility.checkWorldGuard(modifiedLocation)) {
                     continue;
                 }
             }
