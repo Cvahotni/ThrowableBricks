@@ -4,6 +4,7 @@ A small, and fun plugin for Minecraft 1.21+
 # Demonstration
 - https://www.youtube.com/watch?v=rEwW0F-VKyk
 - https://www.youtube.com/watch?v=iTk7DX1PeXo
+- https://www.youtube.com/watch?v=K_31-XF8GE0
 
 # Features so far:
 - Brick throwing on right click with configurable cooldown.
