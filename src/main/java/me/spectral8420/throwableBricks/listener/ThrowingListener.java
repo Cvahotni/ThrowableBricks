@@ -3,16 +3,17 @@ package me.spectral8420.throwableBricks.listener;
 import me.spectral8420.throwableBricks.config.ConfigManager;
 import me.spectral8420.throwableBricks.tracker.CooldownTracker;
 import me.spectral8420.throwableBricks.helper.ThrowHelper;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 public class ThrowingListener implements Listener {
@@ -28,7 +29,7 @@ public class ThrowingListener implements Listener {
 
         ItemStack item = player.getInventory().getItemInMainHand();
 
-        if(item.getType() != Material.BRICK) {
+        if(item.getType() != ConfigManager.getThrowMaterial()) {
             return;
         }
 
@@ -54,18 +55,29 @@ public class ThrowingListener implements Listener {
 
         Location destination = from.add(direction.multiply(5));
 
-        ThrowHelper.throwItemStack(player, destination, world, new ItemStack(item.getType(), 1), 1);
+        ItemStack itemStack = item.clone();
+        itemStack.setAmount(1);
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+
+        if(itemMeta == null) {
+            return;
+        }
+
+        ThrowHelper.throwItemStack(player, destination, world, itemStack, 1 + itemMeta.getEnchantLevel(Enchantment.PUNCH));
         int amount = item.getAmount();
 
-        if(amount <= 1) {
-            player.getInventory().setItemInMainHand(null);
+        if(player.getGameMode() != GameMode.CREATIVE) {
+            if(amount <= 1) {
+                player.getInventory().setItemInMainHand(null);
+            }
+
+            else {
+                item.setAmount(amount - 1);
+            }
         }
 
-        else {
-            item.setAmount(amount - 1);
-        }
-
-        player.playSound(player, Sound.ENTITY_SNOWBALL_THROW, 1.0f, 1.0f);
+        player.playSound(player, ConfigManager.getThrowSound(), 1.0f, 1.0f);
         player.updateInventory();
     }
 }

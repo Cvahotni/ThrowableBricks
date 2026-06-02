@@ -7,10 +7,14 @@ import me.spectral8420.throwableBricks.compatibility.WorldGuardCompatibility;
 import me.spectral8420.throwableBricks.config.ConfigManager;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
@@ -25,7 +29,7 @@ public class ProjectileTracker {
             for(World world : Bukkit.getWorlds()) {
                 damageTargets(world);
             }
-        }, 0, 5);
+        }, 0, 0);
     }
 
     public static void addProjectile(UUID uuid, UUID owner) {
@@ -65,8 +69,12 @@ public class ProjectileTracker {
 
                     if(location.distanceSquared(playerLocation) <= checkDistance) {
                         if(player.getGameMode() != GameMode.CREATIVE) {
-                            hitEntity(player, world);
+                            hitEntity(player, world, entity.getItemStack());
                             hasHitTarget = true;
+
+                            if(!ConfigManager.isDamageMultipleEntitiesAtOnce()) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -84,18 +92,43 @@ public class ProjectileTracker {
                 }
 
                 if(location.distanceSquared(entityLocation) <= checkDistance) {
-                    hitEntity(livingEntity, world);
+                    hitEntity(livingEntity, world, entity.getItemStack());
                     hasHitTarget = true;
+
+                    if(!ConfigManager.isDamageMultipleEntitiesAtOnce()) {
+                        break;
+                    }
                 }
             }
 
             List<Vector> offsets = Arrays.asList(
+                    new Vector(-1.0, -1.0, -1.0),
+                    new Vector(-1.0, -1.0, 0.0),
+                    new Vector(-1.0, -1.0, 1.0),
+                    new Vector(-1.0, 0.0, -1.0),
                     new Vector(-1.0, 0.0, 0.0),
-                    new Vector(1.0, 0.0, 0.0),
+                    new Vector(-1.0, 0.0, 1.0),
+                    new Vector(-1.0, 1.0, -1.0),
+                    new Vector(-1.0, 1.0, 0.0),
+                    new Vector(-1.0, 1.0, 1.0),
+                    new Vector(0.0, -1.0, -1.0),
                     new Vector(0.0, -1.0, 0.0),
-                    new Vector(0.0, 1.0, 0.0),
+                    new Vector(0.0, -1.0, 1.0),
                     new Vector(0.0, 0.0, -1.0),
-                    new Vector(0.0, 0.0, 1.0)
+                    new Vector(0.0, 0.0, 0.0),
+                    new Vector(0.0, 0.0, 1.0),
+                    new Vector(0.0, 1.0, -1.0),
+                    new Vector(0.0, 1.0, 0.0),
+                    new Vector(0.0, 1.0, 1.0),
+                    new Vector(1.0, -1.0, -1.0),
+                    new Vector(1.0, -1.0, 0.0),
+                    new Vector(1.0, -1.0, 1.0),
+                    new Vector(1.0, 0.0, -1.0),
+                    new Vector(1.0, 0.0, 0.0),
+                    new Vector(1.0, 0.0, 1.0),
+                    new Vector(1.0, 1.0, -1.0),
+                    new Vector(1.0, 1.0, 0.0),
+                    new Vector(1.0, 1.0, 1.0)
             );
 
             double distance = 1000.0;
@@ -112,7 +145,7 @@ public class ProjectileTracker {
                 double currentDistance = modifiedLocation.distanceSquared(location);
                 BlockState state = world.getBlockState(modifiedLocation);
 
-                if(!state.getBlock().getType().name().contains("GLASS")) {
+                if(!ConfigManager.isBreakableMaterial(state.getBlock().getType())) {
                     continue;
                 }
 
@@ -123,36 +156,48 @@ public class ProjectileTracker {
             }
 
             Location modifiedLocation = location.clone().add(closest);
-            BlockState state = world.getBlockState(modifiedLocation);
+
+            Location blockLocation = new Location(
+                    world,
+                    Math.floor(modifiedLocation.getX()),
+                    Math.floor(modifiedLocation.getY()),
+                    Math.floor(modifiedLocation.getZ())
+            );
+
+            blockLocation.add(0.5, 0.5, 0.5);
+            BlockState state = world.getBlockState(blockLocation);
 
             if(CompatibilityChecks.isLandsPluginInstalled()) {
-                if(!LandsCompatibility.checkLands(modifiedLocation)) {
+                if(!LandsCompatibility.checkLands(blockLocation)) {
                     continue;
                 }
             }
 
             if(CompatibilityChecks.isWorldGuardPluginInstalled()) {
-                if(!WorldGuardCompatibility.checkWorldGuard(modifiedLocation)) {
+                if(!WorldGuardCompatibility.checkWorldGuard(blockLocation)) {
                     continue;
                 }
             }
 
-            if(state.getBlock().getType().name().contains("GLASS")) {
+            if(ConfigManager.isBreakableMaterial(state.getBlock().getType())) {
                 world.spawnParticle(
                         Particle.BLOCK,
-                        modifiedLocation,
+                        blockLocation,
                         30,
                         0.3, 0.3, 0.3,
                         state.getBlock().getBlockData()
                 );
 
+                BlockData data = state.getBlock().getBlockData();
+                SoundGroup soundGroup = data.getSoundGroup();
+
                 world.playSound(
-                        modifiedLocation,
-                        Sound.BLOCK_GLASS_BREAK,
+                        blockLocation,
+                        soundGroup.getBreakSound(),
                         1.0f, 1.0f
                 );
 
-                world.setBlockData(modifiedLocation, Material.AIR.createBlockData());
+                world.setBlockData(blockLocation, Material.AIR.createBlockData());
                 hasHitTarget = true;
             }
 
@@ -168,9 +213,26 @@ public class ProjectileTracker {
         }
     }
 
-    private static void hitEntity(LivingEntity livingEntity, World world) {
-        world.playSound(livingEntity.getLocation(), Sound.BLOCK_DECORATED_POT_SHATTER, 1.0f, 1.0f);
-        livingEntity.damage(ConfigManager.getDamageFromBrick());
+    private static void hitEntity(LivingEntity livingEntity, World world, ItemStack itemStack) {
+        if(itemStack == null) {
+            return;
+        }
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+
+        if(itemMeta == null) {
+            return;
+        }
+
+        double damageMultiplier = 1.0;
+
+        if(itemMeta.hasEnchant(Enchantment.POWER)) {
+            int level = itemMeta.getEnchantLevel(Enchantment.POWER);
+            damageMultiplier = 1.0 + (((double) level) * ConfigManager.getPowerDamageMultiplier());
+        }
+
+        world.playSound(livingEntity.getLocation(), ConfigManager.getSmashSound(), 1.0f, 1.0f);
+        livingEntity.damage(ConfigManager.getDamageFromBrick() * damageMultiplier);
 
         for(PotionEffect effect : ConfigManager.getEffectsToGiveOnHit()) {
             livingEntity.addPotionEffect(effect);

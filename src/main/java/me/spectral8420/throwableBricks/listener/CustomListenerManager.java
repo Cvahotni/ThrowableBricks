@@ -6,5 +6,6 @@ import org.bukkit.Bukkit;
 public class CustomListenerManager {
     public static void register(ThrowableBricks plugin) {
         Bukkit.getPluginManager().registerEvents(new ThrowingListener(), plugin);
+        Bukkit.getPluginManager().registerEvents(new AnvilEnchantListener(), plugin);
     }
 }
