@@ -11,6 +11,7 @@ A small, and fun plugin for Minecraft 1.21+
 - Damage and potion effects on hit.
 - Affects living entities too, such and animals and mobs, and players.
 - Respects WorldGuard and Lands claims.
+- Ability to customise sounds, the material list for breakable blocks, and the material that can be thrown.
 
 # Installation
 - You can find the pre-built binary at https://github.com/Cvahotni/ThrowableBricks/releases
