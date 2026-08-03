@@ -6,6 +6,7 @@ import me.spectral8420.throwableBricks.helper.ThrowHelper;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,6 +26,14 @@ public class ThrowingListener implements Listener {
 
         if(action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) {
             return;
+        }
+
+        Block block = event.getClickedBlock();
+
+        if(block != null) {
+            if(block.getType().isInteractable()) {
+                return;
+            }
         }
 
         ItemStack item = player.getInventory().getItemInMainHand();
