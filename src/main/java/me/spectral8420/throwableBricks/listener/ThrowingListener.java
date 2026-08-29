@@ -38,9 +38,9 @@ public class ThrowingListener implements Listener {
 
         ItemStack item = player.getInventory().getItemInMainHand();
 
-        if(item.getType() != ConfigManager.getThrowMaterial()) {
-            return;
-        }
+        if(!ConfigManager.isThrowMaterial(item.getType())) {
+    		return;
+		}
 
         float cooldown = (float) ConfigManager.getCooldown();
 

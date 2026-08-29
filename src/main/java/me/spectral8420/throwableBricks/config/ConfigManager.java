@@ -26,7 +26,7 @@ public class ConfigManager {
     private static boolean damageMultipleEntitiesAtOnce = false;
     private static boolean allowEnchantmentsOnThrowableItem = true;
 
-    private static Material throwMaterial = Material.BRICK;
+    private static final List<Material> throwMaterials = new ArrayList<>();
 
     private static NamespacedKey throwSound = NamespacedKey.fromString("entity.snowball.throw");
     private static NamespacedKey smashSound = NamespacedKey.fromString("block.decorated_pot.break");
@@ -70,8 +70,18 @@ public class ConfigManager {
                 allowEnchantmentsOnThrowableItem = config.getBoolean("allowEnchantmentsOnThrowableItem");
             }
 
-            if(config.contains("throwMaterial")) {
-                throwMaterial = Material.valueOf(config.getString("throwMaterial"));
+            if(config.contains("throwMaterials")) {
+                List<String> throwMaterialsList = config.getStringList("throwMaterials");
+                
+                throwMaterials.clear();
+                throwMaterials.addAll(throwMaterialsList.stream().map(Material::valueOf).toList());
+            }
+
+            else {
+                throwMaterials.addAll(Arrays.asList(
+                        Material.BRICK,
+                        Material.NETHER_BRICK
+                ));
             }
 
             if(config.contains("throwSound")) {
@@ -149,7 +159,7 @@ public class ConfigManager {
             config.set("cooldown", cooldown);
             config.set("damageMultipleEntitiesAtOnce", damageMultipleEntitiesAtOnce);
             config.set("allowEnchantmentsOnThrowableItem", allowEnchantmentsOnThrowableItem);
-            config.set("throwMaterial", throwMaterial.name());
+            config.set("throwMaterials", throwMaterials.stream().map(Material::name).collect(Collectors.toList()));
             config.set("throwSound", throwSound.toString());
             config.set("smashSound", smashSound.toString());
             config.set("breakableMaterials", breakableMaterials.stream().map(Material::name).collect(Collectors.toList()));
@@ -254,8 +264,8 @@ public class ConfigManager {
         return effectsToGiveOnHit;
     }
 
-    public static Material getThrowMaterial() {
-        return throwMaterial;
+    public static boolean isThrowMaterial(Material material) {
+        return throwMaterials.contains(material);
     }
 
     public static Sound getThrowSound() {

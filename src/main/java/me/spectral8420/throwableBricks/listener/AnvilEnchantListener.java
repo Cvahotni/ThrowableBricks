@@ -32,7 +32,7 @@ public class AnvilEnchantListener implements Listener {
         ItemStack target = event.getInventory().getFirstItem();
         ItemStack sacrifice = event.getInventory().getSecondItem();
 
-        if(target == null || target.getType() != ConfigManager.getThrowMaterial() || sacrifice == null) {
+        if(target == null || !ConfigManager.isThrowMaterial(target.getType()) || sacrifice == null) {
             return;
         }
 
@@ -96,7 +96,7 @@ public class AnvilEnchantListener implements Listener {
 
         int previousXP = player.getTotalExperience();
 
-        if(resultItem.getType() == ConfigManager.getThrowMaterial()) {
+        if(ConfigManager.isThrowMaterial(resultItem.getType())) {
             event.setCancelled(false);
 
             Bukkit.getScheduler().runTask(plugin, () -> {
