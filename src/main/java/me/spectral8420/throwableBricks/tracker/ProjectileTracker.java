@@ -134,6 +134,8 @@ public class ProjectileTracker {
             double distance = 1000.0;
             Vector closest = offsets.getFirst();
 
+            boolean isFlaming = entity.getItemStack().getItemMeta() != null && entity.getItemStack().getItemMeta().hasEnchant(Enchantment.FLAME);
+
             for(Vector offset : offsets) {
                 Location modifiedLocation = new Location(
                         world,
@@ -145,7 +147,11 @@ public class ProjectileTracker {
                 double currentDistance = modifiedLocation.distanceSquared(location);
                 BlockState state = world.getBlockState(modifiedLocation);
 
-                if(!ConfigManager.isBreakableMaterial(state.getBlock().getType())) {
+                Material type = state.getBlock().getType();
+
+                boolean isFlameTarget = isFlaming && (type == Material.TNT || type == Material.CAMPFIRE || type == Material.SOUL_CAMPFIRE || type.name().contains("CANDLE"));
+
+                if(!ConfigManager.isBreakableMaterial(state.getBlock().getType()) && !isFlameTarget) {
                     continue;
                 }
 
@@ -156,6 +162,10 @@ public class ProjectileTracker {
             }
 
             Location modifiedLocation = location.clone().add(closest);
+
+            //get block reference before offset is added to help with thin targets
+            org.bukkit.block.Block trueBlock = world.getBlockAt(modifiedLocation);
+            Material trueType = trueBlock.getType();
 
             Location blockLocation = new Location(
                     world,
@@ -201,6 +211,40 @@ public class ProjectileTracker {
                 hasHitTarget = true;
             }
 
+            //lets flame bricks work like flame bows
+            if(isFlaming) {
+                //TNT
+                if(trueType == Material.TNT) {
+                    trueBlock.setType(Material.AIR);
+                    org.bukkit.entity.TNTPrimed tnt = world.spawn(blockLocation, org.bukkit.entity.TNTPrimed.class);
+                    org.bukkit.entity.Entity owner = world.getEntity(projectileOwners.get(uuid));
+                    if(owner instanceof Player p) {
+                        tnt.setSource(p);
+                    }
+                    hasHitTarget = true;
+                }
+                //campfires
+                else if(trueType == Material.CAMPFIRE || trueType == Material.SOUL_CAMPFIRE) {
+                    if(trueBlock.getBlockData() instanceof org.bukkit.block.data.type.Campfire campfireData) {
+                        if(!campfireData.isLit()) {
+                            campfireData.setLit(true);
+                            trueBlock.setBlockData(campfireData);
+                            world.playSound(blockLocation, org.bukkit.Sound.ITEM_FLINTANDSTEEL_USE, 1.0f, 1.0f);
+                            hasHitTarget = true;
+                        }
+                    }
+                }
+                //candles
+                else if(trueBlock.getBlockData() instanceof org.bukkit.block.data.type.Candle candleData) {
+                    if(!candleData.isLit()) {
+                        candleData.setLit(true);
+                        trueBlock.setBlockData(candleData);
+                        world.playSound(blockLocation, org.bukkit.Sound.ITEM_FLINTANDSTEEL_USE, 1.0f, 1.0f);
+                        hasHitTarget = true;
+                    }
+                }
+            }
+
             if(hasHitTarget) {
                 projectilesToRemove.add(entity.getUniqueId());
                 entity.remove();
@@ -229,6 +273,11 @@ public class ProjectileTracker {
         if(itemMeta.hasEnchant(Enchantment.POWER)) {
             int level = itemMeta.getEnchantLevel(Enchantment.POWER);
             damageMultiplier = 1.0 + (((double) level) * ConfigManager.getPowerDamageMultiplier());
+        }
+
+        //burn the living
+        if(itemMeta.hasEnchant(Enchantment.FLAME)) {
+            livingEntity.setFireTicks(100);
         }
 
         world.playSound(livingEntity.getLocation(), ConfigManager.getSmashSound(), 1.0f, 1.0f);

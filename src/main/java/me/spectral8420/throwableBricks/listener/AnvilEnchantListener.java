@@ -59,6 +59,7 @@ public class AnvilEnchantListener implements Listener {
 
             int powerLevel = 0;
             int punchLevel = 0;
+            int flameLevel = 0;
 
             if(bookMeta.hasStoredEnchant(Enchantment.POWER)) {
                 powerLevel = bookMeta.getStoredEnchantLevel(Enchantment.POWER);
@@ -68,7 +69,11 @@ public class AnvilEnchantListener implements Listener {
                 punchLevel = bookMeta.getStoredEnchantLevel(Enchantment.PUNCH);
             }
 
-            if(powerLevel > 0 || punchLevel > 0 || hasRename) {
+            if(bookMeta.hasStoredEnchant(Enchantment.FLAME)) {
+                flameLevel = bookMeta.getStoredEnchantLevel(Enchantment.FLAME);
+            }
+
+            if(powerLevel > 0 || punchLevel > 0 || flameLevel > 0 || hasRename) {
                 ItemStack result = target.clone();
                 ItemMeta resultMeta = result.getItemMeta();
 
@@ -84,9 +89,13 @@ public class AnvilEnchantListener implements Listener {
                     resultMeta.addEnchant(Enchantment.PUNCH, punchLevel, false);
                 }
 
+                if(flameLevel > 0) {
+                    resultMeta.addEnchant(Enchantment.FLAME, flameLevel, false);
+                }
+
                 result.setItemMeta(resultMeta);
                 event.setResult(result);
-                event.getInventory().setRepairCost(powerLevel > 0 || punchLevel > 0 ? 2 : 1); //add exp cost if wanted
+                event.getInventory().setRepairCost(powerLevel > 0 || punchLevel > 0 || flameLevel > 0 ? 2 : 1); //add exp cost if wanted
             }
         }
 

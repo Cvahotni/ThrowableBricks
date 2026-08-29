@@ -3,11 +3,14 @@ package me.spectral8420.throwableBricks.listener;
 import me.spectral8420.throwableBricks.config.ConfigManager;
 import me.spectral8420.throwableBricks.tracker.CooldownTracker;
 import me.spectral8420.throwableBricks.helper.ThrowHelper;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,17 +33,21 @@ public class ThrowingListener implements Listener {
 
         Block block = event.getClickedBlock();
 
-        if(block != null) {
-            if(block.getType().isInteractable()) {
-                return;
+        if(block != null && block.getType().isInteractable()) {
+            Material type = block.getType();
+            
+            //let flame bricks work like arrows
+            if (type != Material.CAMPFIRE && type != Material.SOUL_CAMPFIRE && 
+                type != Material.TNT && !type.name().contains("CANDLE")) {
+                return; 
             }
         }
 
         ItemStack item = player.getInventory().getItemInMainHand();
 
         if(!ConfigManager.isThrowMaterial(item.getType())) {
-    		return;
-		}
+            return;
+        }
 
         float cooldown = (float) ConfigManager.getCooldown();
 
@@ -73,7 +80,29 @@ public class ThrowingListener implements Listener {
             return;
         }
 
+        boolean hasFlame = itemMeta.hasEnchant(Enchantment.FLAME);
+        Location spawnLoc = player.getEyeLocation();
+
         ThrowHelper.throwItemStack(player, destination, world, itemStack, 1 + itemMeta.getEnchantLevel(Enchantment.PUNCH));
+        
+        //animate the fire on the brick
+        if(hasFlame) {
+            org.bukkit.plugin.Plugin mainPlugin = Bukkit.getPluginManager().getPlugin("ThrowableBricks");
+            if (mainPlugin != null) {
+                Bukkit.getScheduler().runTask(mainPlugin, () -> {
+                    for (org.bukkit.entity.Entity nearby : world.getNearbyEntities(spawnLoc, 2.0, 2.0, 2.0)) {
+                        if (nearby instanceof Item projectileItem) {
+                            if (ConfigManager.isThrowMaterial(projectileItem.getItemStack().getType()) && projectileItem.getPickupDelay() > 0) {
+                                projectileItem.setVisualFire(true);
+                                projectileItem.setFireTicks(300);
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
         int amount = item.getAmount();
 
         if(player.getGameMode() != GameMode.CREATIVE) {
