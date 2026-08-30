@@ -32,7 +32,25 @@ public class AnvilEnchantListener implements Listener {
         ItemStack target = event.getInventory().getFirstItem();
         ItemStack sacrifice = event.getInventory().getSecondItem();
 
-        if(target == null || target.getType() != ConfigManager.getThrowMaterial() || sacrifice == null) {
+        if(target == null || !ConfigManager.isThrowMaterial(target.getType())) {
+            return;
+        }
+
+        String renameText = event.getInventory().getRenameText();
+        boolean hasRename = renameText != null && !renameText.isEmpty();
+
+        //if just looking to rename
+        if(sacrifice == null) {
+            if(hasRename) {
+                ItemStack result = target.clone();
+                ItemMeta resultMeta = result.getItemMeta();
+                if(resultMeta != null) {
+                    resultMeta.setDisplayName(renameText);
+                    result.setItemMeta(resultMeta);
+                    event.setResult(result);
+                    event.getInventory().setRepairCost(1); //add exp cost if wanted
+                }
+            }
             return;
         }
 
@@ -41,6 +59,7 @@ public class AnvilEnchantListener implements Listener {
 
             int powerLevel = 0;
             int punchLevel = 0;
+            int flameLevel = 0;
 
             if(bookMeta.hasStoredEnchant(Enchantment.POWER)) {
                 powerLevel = bookMeta.getStoredEnchantLevel(Enchantment.POWER);
@@ -50,9 +69,17 @@ public class AnvilEnchantListener implements Listener {
                 punchLevel = bookMeta.getStoredEnchantLevel(Enchantment.PUNCH);
             }
 
-            if(powerLevel > 0 || punchLevel > 0) {
+            if(bookMeta.hasStoredEnchant(Enchantment.FLAME)) {
+                flameLevel = bookMeta.getStoredEnchantLevel(Enchantment.FLAME);
+            }
+
+            if(powerLevel > 0 || punchLevel > 0 || flameLevel > 0 || hasRename) {
                 ItemStack result = target.clone();
                 ItemMeta resultMeta = result.getItemMeta();
+
+                if(hasRename) {
+                    resultMeta.setDisplayName(renameText);
+                }
 
                 if(powerLevel > 0) {
                     resultMeta.addEnchant(Enchantment.POWER, powerLevel, false);
@@ -62,10 +89,23 @@ public class AnvilEnchantListener implements Listener {
                     resultMeta.addEnchant(Enchantment.PUNCH, punchLevel, false);
                 }
 
+                if(flameLevel > 0) {
+                    resultMeta.addEnchant(Enchantment.FLAME, flameLevel, false);
+                }
+
                 result.setItemMeta(resultMeta);
                 event.setResult(result);
+                event.getInventory().setRepairCost(powerLevel > 0 || punchLevel > 0 || flameLevel > 0 ? 2 : 1); //add exp cost if wanted
             }
         }
+
+        //helps to keep exp cost visible
+        org.bukkit.Bukkit.getScheduler().runTask((org.bukkit.plugin.Plugin)this.plugin, () -> {
+            if(event.getView().getPlayer() instanceof Player p) {
+                p.updateInventory();
+            }
+        });
+
     }
 
     @EventHandler
@@ -96,7 +136,7 @@ public class AnvilEnchantListener implements Listener {
 
         int previousXP = player.getTotalExperience();
 
-        if(resultItem.getType() == ConfigManager.getThrowMaterial()) {
+        if(ConfigManager.isThrowMaterial(resultItem.getType())) {
             event.setCancelled(false);
 
             Bukkit.getScheduler().runTask(plugin, () -> {
