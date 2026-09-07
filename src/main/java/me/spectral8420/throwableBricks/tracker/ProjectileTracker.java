@@ -218,11 +218,14 @@ public class ProjectileTracker {
                     trueBlock.setType(Material.AIR);
                     org.bukkit.entity.TNTPrimed tnt = world.spawn(blockLocation, org.bukkit.entity.TNTPrimed.class);
                     org.bukkit.entity.Entity owner = world.getEntity(projectileOwners.get(uuid));
-                    if(owner instanceof Player p) {
-                        tnt.setSource(p);
+
+                    if(owner instanceof Player player) {
+                        tnt.setSource(player);
                     }
+
                     hasHitTarget = true;
                 }
+
                 //campfires
                 else if(trueType == Material.CAMPFIRE || trueType == Material.SOUL_CAMPFIRE) {
                     if(trueBlock.getBlockData() instanceof org.bukkit.block.data.type.Campfire campfireData) {
@@ -234,6 +237,7 @@ public class ProjectileTracker {
                         }
                     }
                 }
+
                 //candles
                 else if(trueBlock.getBlockData() instanceof org.bukkit.block.data.type.Candle candleData) {
                     if(!candleData.isLit()) {

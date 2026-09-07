@@ -1,4 +1,4 @@
 name: ThrowableBricks
-version: '1.4-SNAPSHOT'
+version: '1.5-SNAPSHOT'
 main: me.spectral8420.throwableBricks.ThrowableBricks
 api-version: '1.21'

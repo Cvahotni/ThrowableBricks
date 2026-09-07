@@ -88,13 +88,15 @@ public class ThrowingListener implements Listener {
         //animate the fire on the brick
         if(hasFlame) {
             org.bukkit.plugin.Plugin mainPlugin = Bukkit.getPluginManager().getPlugin("ThrowableBricks");
-            if (mainPlugin != null) {
+
+            if(mainPlugin != null) {
                 Bukkit.getScheduler().runTask(mainPlugin, () -> {
-                    for (org.bukkit.entity.Entity nearby : world.getNearbyEntities(spawnLoc, 2.0, 2.0, 2.0)) {
-                        if (nearby instanceof Item projectileItem) {
-                            if (ConfigManager.isThrowMaterial(projectileItem.getItemStack().getType()) && projectileItem.getPickupDelay() > 0) {
+                    for(org.bukkit.entity.Entity nearby : world.getNearbyEntities(spawnLoc, 2.0, 2.0, 2.0)) {
+                        if(nearby instanceof Item projectileItem) {
+                            if(ConfigManager.isThrowMaterial(projectileItem.getItemStack().getType()) && projectileItem.getPickupDelay() > 0) {
                                 projectileItem.setVisualFire(true);
                                 projectileItem.setFireTicks(300);
+
                                 break;
                             }
                         }
